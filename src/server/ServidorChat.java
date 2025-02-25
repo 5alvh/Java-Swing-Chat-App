@@ -17,11 +17,7 @@ public class ServidorChat {
 
     public static void main(String[] args) {
         System.out.println("Iniciando Servidor.");
-        
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.out.println("\nServidor finalizando. Usuarios conectados:");
-            listaUsuarios.keySet().forEach(System.out::println);
-        }));
+       
         ServerSocket server = null;
 
         try{
@@ -32,9 +28,13 @@ public class ServidorChat {
                 hiloUsuario.start();
             }
         } catch (IOException e) {
-            System.out.println("ERROR: " + e.getMessage());
+            System.out.println("");
         }finally{
-        	
+        	try {
+				server.close();
+			} catch (IOException e) {
+				System.out.println("");
+			}
         }
     }
 
@@ -48,8 +48,10 @@ public class ServidorChat {
     }
 
     public static synchronized void eliminarUsuario(String nickname) {
+    	
         listaUsuarios.remove(nickname);
-        inviarAtodo("SEVER: ", nickname +"ha salido del chat.");
+        inviarAtodo("SERVER: ", nickname +" ha salido del chat.");
+        mostrarEstadoConexiones();
     }
 
     private static void mostrarEstadoConexiones() {
@@ -57,7 +59,7 @@ public class ServidorChat {
     }
 
     public static void inviarAtodo(String nickname, String mensaje) {
-        String mensajeFormateado = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")) + "] " + nickname + " -> " + mensaje + "\n";
+        String mensajeFormateado = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss")) + "] " + nickname + " -> " + mensaje + "\n";
         logMensajes.add(mensajeFormateado);
         
         for (HiloServerChat usuario : listaUsuarios.values()) {
@@ -68,7 +70,7 @@ public class ServidorChat {
     public static void enviarPrivado(String emisor, String receptor, String mensaje) {
         HiloServerChat destinatario = listaUsuarios.get(receptor);
         if (destinatario != null) {
-        	String mensajePrivado = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm")) + "] [PRIVADO] " + emisor + " -> " + mensaje + "\n";
+        	String mensajePrivado = "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("yy-MM-dd HH:mm:ss")) + "] [PRIVADO] " + emisor + " -> " + mensaje + "\n";
             destinatario.enviarMensaje(mensajePrivado);
             listaUsuarios.get(emisor).enviarMensaje(mensajePrivado);
         }

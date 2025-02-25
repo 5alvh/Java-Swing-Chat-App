@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import javax.swing.JOptionPane;
+
 public class HiloServerChat implements Runnable {
     private Socket socket;
     private BufferedReader entrada;
@@ -59,7 +61,7 @@ public class HiloServerChat implements Runnable {
                 }
             }
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+        	System.out.print("");
         } finally {
             ServidorChat.eliminarUsuario(nickname);
             

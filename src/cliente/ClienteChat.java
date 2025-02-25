@@ -4,6 +4,8 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.awt.event.KeyAdapter;
 
 public class ClienteChat extends JFrame {
@@ -53,6 +55,36 @@ public class ClienteChat extends JFrame {
         textArea.setEditable(false);
         textArea.setLineWrap(true);
         textArea.setWrapStyleWord(true);
+        textArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent evt) {
+                int offset = textArea.viewToModel2D(evt.getPoint());
+                try {
+                    int start = offset;
+                    int end = offset;
+                    String text = textArea.getText();
+
+                    while (start > 0 && text.charAt(start - 1) != ' ' && text.charAt(start - 1) != '\n') {
+                        start--;
+                    }
+
+                    while (end < text.length() && text.charAt(end) != ' ' && text.charAt(end) != '\n') {
+                        end++;
+                    }
+
+                    String clickedWord = text.substring(start, end).trim();
+
+
+                    if (!clickedWord.isEmpty() && !clickedWord.contains(":") && !clickedWord.equals("->")) {
+                        textField.setText("/p " + clickedWord + " "); 
+                        textField.requestFocus(); 
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
 
         JScrollPane scrollPane = new JScrollPane(textArea);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
@@ -66,15 +98,17 @@ public class ClienteChat extends JFrame {
         gbc_scrollPane.gridy = 0;
         contentPane.add(scrollPane, gbc_scrollPane);
 
-        // Botón de ayuda
         JButton btnHelp = new JButton("?");
-        btnHelp.addActionListener(e -> {
-            JOptionPane.showMessageDialog(this,
-                "Para enviar un mensaje privado use:\n" +
-                "/p nombreUsuario mensaje\n\n" +
-                "Ejemplo: /p Juan Hola Juan!",
-                "Ayuda",
-                JOptionPane.INFORMATION_MESSAGE);
+        btnHelp.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                JOptionPane.showMessageDialog(null,
+                    "Para enviar un mensaje privado use:\n" +
+                    "/p nombreUsuario mensaje\n\n" +
+                    "Ejemplo: /p Juan Hola Juan!",
+                    "Ayuda",
+                    JOptionPane.INFORMATION_MESSAGE);
+            }
         });
 
         GridBagConstraints gbc_btnHelp = new GridBagConstraints();
@@ -106,14 +140,23 @@ public class ClienteChat extends JFrame {
         gbc_btnSalir.anchor = GridBagConstraints.NORTH;
         gbc_btnSalir.insets = new Insets(5, 5, 5, 0);
         gbc_btnSalir.gridx = 2;
-        gbc_btnSalir.gridy = 0;
+        gbc_btnSalir.gridy = 2;
         contentPane.add(btnSalir, gbc_btnSalir);
 
-        btnEnviar.addActionListener(e -> enviarMensaje());
-        
-        btnSalir.addActionListener(e -> {
-            usuario.cerrarConexion();
-            System.exit(0);
+        btnEnviar.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                enviarMensaje();
+            }
+        });
+
+        btnSalir.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                usuario.cerrarConexion();
+                
+                System.exit(0);
+            }
         });
 
         textField.addKeyListener(new KeyAdapter() {
